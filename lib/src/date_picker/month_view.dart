@@ -3971,7 +3971,7 @@ void _drawFillSelection(Canvas canvas, double x, double y, double width,
 void _drawStartRangeFillSelection(Canvas canvas, double x, double y,
     double width, double height, Paint selectionPainter, Color color) {
   const double padding = 1;
-  final double cornerRadius = 6;
+  const double cornerRadius = 6;
   Rect rect = Rect.fromLTRB(x + width/2, y + padding + 2,
               x + width, y + height - padding - 2);
   canvas.drawRect(rect, selectionPainter);
@@ -3981,10 +3981,10 @@ void _drawStartRangeFillSelection(Canvas canvas, double x, double y,
       RRect.fromRectAndCorners(
           Rect.fromLTRB(
               x + padding + 6, y + padding + 2, x + width - 6, y + height - padding - 2),
-          bottomLeft: Radius.circular(cornerRadius),
-          topLeft: Radius.circular(cornerRadius),
-          bottomRight: Radius.circular(cornerRadius),
-          topRight: Radius.circular(cornerRadius),
+          bottomLeft: const Radius.circular(cornerRadius),
+          topLeft: const Radius.circular(cornerRadius),
+          bottomRight: const Radius.circular(cornerRadius),
+          topRight: const Radius.circular(cornerRadius),
         ),
       selectionPainter);
 }
@@ -3992,7 +3992,7 @@ void _drawStartRangeFillSelection(Canvas canvas, double x, double y,
 void _drawEndRangeFillSelection(Canvas canvas, double x, double y, double width,
     double height, Paint selectionPainter, Color color) {
   const double padding = 1;
-  final double cornerRadius = height / 4 > 10 ? 10 : height / 4;
+  const double cornerRadius = 6;
   Rect rect = Rect.fromLTRB(x, y + padding + 2,
             x + width/2, y + height - padding - 2);
   canvas.drawRect(rect, selectionPainter);
@@ -4002,10 +4002,10 @@ void _drawEndRangeFillSelection(Canvas canvas, double x, double y, double width,
       RRect.fromRectAndCorners(
           Rect.fromLTRB(
               x + 6, y + padding + 2, x + width - padding - 6, y + height - padding - 2),
-          bottomLeft: Radius.circular(cornerRadius),
-          topLeft: Radius.circular(cornerRadius),
-          bottomRight: Radius.circular(cornerRadius),
-          topRight: Radius.circular(cornerRadius),
+          bottomLeft: const Radius.circular(cornerRadius),
+          topLeft: const Radius.circular(cornerRadius),
+          bottomRight: const Radius.circular(cornerRadius),
+          topRight: const Radius.circular(cornerRadius),
         ),
       selectionPainter);
 }

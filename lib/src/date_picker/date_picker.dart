@@ -6796,7 +6796,11 @@ class _SfDateRangePickerState extends State<_SfDateRangePicker>
               _isRtl,
               _textScaleFactor,
               widget.isHijri,
-              _localizations),
+              _localizations,
+              widget.onCancel,
+              widget.onSubmit,
+              widget.cancelText,
+              widget.confirmText),
         ),
         onTapUp: (TapUpDetails details) {
           if (_view == DateRangePickerView.century ||
@@ -6930,7 +6934,11 @@ class _SfDateRangePickerState extends State<_SfDateRangePicker>
                 _isRtl,
                 _textScaleFactor,
                 widget.isHijri,
-                _localizations),
+                _localizations,
+                widget.onCancel,
+                widget.onSubmit,
+                widget.cancelText,
+                widget.confirmText),
           ),
           onTapUp: (TapUpDetails details) {
             _updateCalendarTapCallbackForHeader();
@@ -7823,6 +7831,10 @@ class _PickerHeaderView extends StatefulWidget {
       this.textScaleFactor,
       this.isHijri,
       this.localizations,
+      this.onCancel,
+      this.onSubmit,
+      this.cancelText,
+      this.submitText,
       {Key? key})
       : super(key: key);
 
@@ -7902,6 +7914,14 @@ class _PickerHeaderView extends StatefulWidget {
 
   /// Specifies the picker mode for [SfDateRangePicker].
   final bool isHijri;
+
+  final Function()? onCancel;
+
+  final Function(Object?)? onSubmit;
+
+  final String cancelText;
+
+  final String submitText;
 
   @override
   _PickerHeaderViewState createState() => _PickerHeaderViewState();
@@ -8015,13 +8035,47 @@ class _PickerHeaderViewState extends State<_PickerHeaderView> {
             headerText,
           ]);
     } else {
-      return Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            leftArrow,
-            headerText,
-            rightArrow,
-          ]);
+      return Container(
+        margin: const EdgeInsets.only(bottom: 10),
+        child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              if (widget.onCancel != null)
+                SizedBox(
+                  width: 50,
+                  child: InkWell(
+                    onTap: widget.onCancel,
+                    child: Text(
+                      widget.cancelText,
+                      style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.w500,
+                        color: Color(0xff05AABD)
+                      ),
+                    ),
+                  ),
+                ),
+              leftArrow,
+              headerText,
+              rightArrow,
+              if (widget.onSubmit != null)
+                SizedBox(
+                  width: 50,
+                  child: InkWell(
+                    onTap: () {
+                      widget.onSubmit?.call(null);
+                    },
+                    child: Text(
+                      widget.submitText,
+                      textAlign: TextAlign.end,
+                      style: const TextStyle(
+                        fontSize: 16, fontWeight: FontWeight.w500,
+                        color: Color(0xff05AABD)
+                      ),
+                    ),
+                  ),
+                ),
+            ]),
+      );
     }
   }
 
@@ -8107,7 +8161,11 @@ class _PickerHeaderViewState extends State<_PickerHeaderView> {
               widget.isHijri,
               widget.localizations,
               widget.navigationDirection),
-          size: Size(headerWidth, widget.height),
+          size: Size(
+            headerWidth
+              - ((widget.onCancel != null && widget.onSubmit != null)? 100 : 0),
+            widget.height,
+          ),
         )));
   }
 
@@ -8496,8 +8554,7 @@ class _PickerViewHeaderPainter extends CustomPainter {
         currentDate = visibleDates[index];
         String dayText =
             DateFormat(monthViewSettings.dayFormat, locale.toString())
-                .format(isHijri ? currentDate.toDateTime() : currentDate)
-                .toUpperCase();
+                .format(isHijri ? currentDate.toDateTime() : currentDate);
         dayText = _updateViewHeaderFormat(dayText);
 
         if (hasToday &&
@@ -8586,8 +8643,7 @@ class _PickerViewHeaderPainter extends CustomPainter {
             label: DateFormat('EEEEE')
                 .format(isHijri
                     ? visibleDates[(j * datesCount) + i].toDateTime()
-                    : visibleDates[(j * datesCount) + i])
-                .toUpperCase(),
+                    : visibleDates[(j * datesCount) + i]),
             textDirection: TextDirection.ltr,
           ),
         ));

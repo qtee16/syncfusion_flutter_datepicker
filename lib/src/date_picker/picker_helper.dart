@@ -916,7 +916,7 @@ class DateRangePickerHelper {
   static double getWeekNumberPanelWidth(
       bool showWeekNumber, double width, bool isMobilePlatform) {
     return showWeekNumber
-        ? (width / (DateTime.daysPerWeek + 1)) / (isMobilePlatform ? 1.3 : 4)
+        ? (width / (DateTime.daysPerWeek + 1))
         : 0;
   }
 

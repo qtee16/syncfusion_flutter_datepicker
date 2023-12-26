@@ -3822,14 +3822,14 @@ void _drawStartAndEndRange(
       break;
     case DateRangePickerSelectionShape.rectangle:
       {
-        view._selectionPainter.isAntiAlias = true;
-        view._selectionPainter.color = color;
+        // view._selectionPainter.isAntiAlias = true;
+        // view._selectionPainter.color = color;
         if (isStartRange) {
           _drawStartRangeFillSelection(
-              canvas, x, y, cellWidth, cellHeight, view._selectionPainter);
+              canvas, x, y, cellWidth, cellHeight, view._selectionPainter, color);
         } else {
           _drawEndRangeFillSelection(
-              canvas, x, y, cellWidth, cellHeight, view._selectionPainter);
+              canvas, x, y, cellWidth, cellHeight, view._selectionPainter, color);
         }
       }
   }
@@ -3969,28 +3969,44 @@ void _drawFillSelection(Canvas canvas, double x, double y, double width,
 }
 
 void _drawStartRangeFillSelection(Canvas canvas, double x, double y,
-    double width, double height, Paint selectionPainter) {
+    double width, double height, Paint selectionPainter, Color color) {
   const double padding = 1;
-  final double cornerRadius = height / 4 > 10 ? 10 : height / 4;
+  final double cornerRadius = 6;
+  Rect rect = Rect.fromLTRB(x + width/2, y + padding + 2,
+              x + width, y + height - padding - 2);
+  canvas.drawRect(rect, selectionPainter);
+  selectionPainter.isAntiAlias = true;
+  selectionPainter.color = color;
   canvas.drawRRect(
       RRect.fromRectAndCorners(
           Rect.fromLTRB(
-              x + padding, y + padding, x + width, y + height - padding),
+              x + padding + 6, y + padding + 2, x + width - 6, y + height - padding - 2),
           bottomLeft: Radius.circular(cornerRadius),
-          topLeft: Radius.circular(cornerRadius)),
+          topLeft: Radius.circular(cornerRadius),
+          bottomRight: Radius.circular(cornerRadius),
+          topRight: Radius.circular(cornerRadius),
+        ),
       selectionPainter);
 }
 
 void _drawEndRangeFillSelection(Canvas canvas, double x, double y, double width,
-    double height, Paint selectionPainter) {
+    double height, Paint selectionPainter, Color color) {
   const double padding = 1;
   final double cornerRadius = height / 4 > 10 ? 10 : height / 4;
+  Rect rect = Rect.fromLTRB(x, y + padding + 2,
+            x + width/2, y + height - padding - 2);
+  canvas.drawRect(rect, selectionPainter);
+  selectionPainter.isAntiAlias = true;
+  selectionPainter.color = color;
   canvas.drawRRect(
       RRect.fromRectAndCorners(
           Rect.fromLTRB(
-              x, y + padding, x + width - padding, y + height - padding),
+              x + 6, y + padding + 2, x + width - padding - 6, y + height - padding - 2),
+          bottomLeft: Radius.circular(cornerRadius),
+          topLeft: Radius.circular(cornerRadius),
           bottomRight: Radius.circular(cornerRadius),
-          topRight: Radius.circular(cornerRadius)),
+          topRight: Radius.circular(cornerRadius),
+        ),
       selectionPainter);
 }
 
@@ -4004,7 +4020,7 @@ void _drawStartEndRangeCircleSelection(Canvas canvas, double x, double y,
 
 void _drawRectRangeSelection(Canvas canvas, double left, double top,
     double right, double bottom, Paint selectionPainter) {
-  canvas.drawRect(Rect.fromLTRB(left, top, right, bottom), selectionPainter);
+  canvas.drawRect(Rect.fromLTRB(left, top + 2, right, bottom - 2), selectionPainter);
 }
 
 void _drawMonthCellsAndSelection(PaintingContext context, Size size,

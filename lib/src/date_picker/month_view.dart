@@ -3141,7 +3141,7 @@ class _MonthViewRangeSelectionRenderObject extends _IMonthView {
 
     _centerXPosition = _cellWidth / 2;
     _centerYPosition = _cellHeight / 2;
-    _drawMonthCellsAndSelection(context, size, this, _cellWidth, _cellHeight);
+    _drawMonthCellsAndSelection(context, size, this, _cellWidth, _cellHeight, selectedRanges: selectedRange);
   }
 
   @override
@@ -3441,7 +3441,7 @@ class _MonthViewExtendableRangeSelectionRenderObject extends _IMonthView {
 
     _centerXPosition = _cellWidth / 2;
     _centerYPosition = _cellHeight / 2;
-    _drawMonthCellsAndSelection(context, size, this, _cellWidth, _cellHeight);
+    _drawMonthCellsAndSelection(context, size, this, _cellWidth, _cellHeight, selectedRanges: selectedRange);
   }
 
   @override
@@ -3738,7 +3738,7 @@ class _MonthViewMultiRangeSelectionRenderObject extends _IMonthView {
 
     _centerXPosition = _cellWidth / 2;
     _centerYPosition = _cellHeight / 2;
-    _drawMonthCellsAndSelection(context, size, this, _cellWidth, _cellHeight);
+    _drawMonthCellsAndSelection(context, size, this, _cellWidth, _cellHeight, selectedRanges: selectedRanges);
   }
 
   @override
@@ -4023,8 +4023,20 @@ void _drawRectRangeSelection(Canvas canvas, double left, double top,
   canvas.drawRect(Rect.fromLTRB(left, top + 2, right, bottom - 2), selectionPainter);
 }
 
+processWeekNumberOfRange(selectedRange, monthView) {
+  final String startWeekNumber =
+      DateRangePickerHelper.getWeekNumberOfYear(selectedRange.startDate, monthView.isHijri)
+          .toString();
+  
+  final String endWeekNumber =
+      DateRangePickerHelper.getWeekNumberOfYear(selectedRange.endDate, monthView.isHijri)
+          .toString();
+  // ignore: always_specify_types
+  return [startWeekNumber, endWeekNumber];
+}
+
 void _drawMonthCellsAndSelection(PaintingContext context, Size size,
-    _IMonthView monthView, double cellWidth, double cellHeight) {
+    _IMonthView monthView, double cellWidth, double cellHeight, {dynamic selectedRanges}) {
   final double weekNumberPanelWidth = monthView.weekNumberPanelWidth;
   final Canvas canvas = context.canvas;
   double xPosition = monthView._isRtl ? 0 : weekNumberPanelWidth, yPosition;
@@ -4166,7 +4178,8 @@ void _drawMonthCellsAndSelection(PaintingContext context, Size size,
               weekNumberPanelWidth,
               monthView,
               viewStartPosition,
-              viewEndPosition);
+              viewEndPosition,
+              selectedRanges);
         }
 
         if (hideLeadingAndTrailingDates && currentDateMonth != currentMonth) {
@@ -4229,7 +4242,8 @@ void _drawMonthCellsAndSelection(PaintingContext context, Size size,
               weekNumberPanelWidth,
               monthView,
               viewStartPosition,
-              viewEndPosition);
+              viewEndPosition,
+              selectedRanges);
         }
 
         if (monthView.mouseHoverPosition.value != null &&
@@ -4392,7 +4406,8 @@ void _drawMonthCellsAndSelection(PaintingContext context, Size size,
             weekNumberPanelWidth,
             monthView,
             viewStartPosition,
-            viewEndPosition);
+            viewEndPosition,
+            selectedRanges);
       }
 
       bool isNextMonth = false;
@@ -4428,7 +4443,8 @@ void _drawMonthCellsAndSelection(PaintingContext context, Size size,
             weekNumberPanelWidth,
             monthView,
             viewStartPosition,
-            viewEndPosition);
+            viewEndPosition,
+            selectedRanges);
       }
 
       isCurrentDate = isSameDate(date, today);
@@ -4547,6 +4563,16 @@ void _drawMonthCellsAndSelection(PaintingContext context, Size size,
   }
 }
 
+bool isInStringRange(List<dynamic> range, String value) {
+  final int start = int.parse(range.first);
+  final int end = int.parse(range.last);
+  final int intValue = int.parse(value);
+  if (start <= intValue && intValue <= end) {
+    return true;
+  }
+  return false;
+}
+
 void _drawWeekNumber(
     Canvas canvas,
     Size size,
@@ -4556,10 +4582,19 @@ void _drawWeekNumber(
     double weekNumberPanelWidth,
     _IMonthView monthView,
     double viewStartPosition,
-    double viewEndPosition) {
+    double viewEndPosition,
+    dynamic selectedRange) {
   final String weekNumber =
       DateRangePickerHelper.getWeekNumberOfYear(date, monthView.isHijri)
           .toString();
+  List<dynamic> range = [];
+  if (selectedRange.startDate != null && selectedRange.endDate != null) {
+    range = processWeekNumberOfRange(selectedRange, monthView);
+  }
+
+  if (range.isNotEmpty && isInStringRange(range, weekNumber)) {
+    _drawCellBackground(canvas, 0, yPosition, weekNumberPanelWidth, cellHeight, monthView);
+  }
   final TextStyle weekNumberTextStyle = monthView.weekNumberStyle.textStyle ??
       monthView.datePickerTheme.weekNumberTextStyle!;
   final TextSpan textSpan =
@@ -4584,6 +4619,18 @@ void _drawWeekNumber(
       canvas,
       Offset(weekNumberPosition,
           yPosition + ((cellHeight - monthView._textPainter.height) / 2)));
+}
+
+void _drawCellBackground(Canvas canvas, double xPosition, double yPosition, double cellWidth, double cellHeight, _IMonthView monthView,) {
+  final double padding = monthView.isMobilePlatform ? 7 : 0;
+  final Rect rect = Rect.fromLTRB(xPosition + padding, yPosition + padding - 4,
+      (xPosition + cellWidth) - padding, yPosition + cellHeight - padding + 4);
+  final Paint linePainter = Paint();
+  linePainter.style = PaintingStyle.fill;
+  linePainter.color = monthView.startRangeSelectionColor ?? monthView.datePickerTheme.weekNumberBackgroundColor!;;
+  final RRect roundedRect =
+      RRect.fromRectAndRadius(rect, Radius.circular(padding - 1));
+  canvas.drawRRect(roundedRect, linePainter);
 }
 
 void _drawWeekNumberPanel(Canvas canvas, Size size, double weekNumberPanelWidth,
